@@ -1,5 +1,7 @@
+// src/components/InvestigadoresList.js
 import React, { useState, useEffect } from 'react';
-import './styles.css';
+import '../assets/css/styles.css'; // Importa tus estilos desde la carpeta assets
+import { eliminarInvestigador, cargarPagina } from '../services/api'; // Importa las funciones del servicio
 
 function InvestigadoresList() {
   const [error, setError] = useState(null);
@@ -9,40 +11,26 @@ function InvestigadoresList() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const cargarPagina = (pageNumber) => {
-      setLoading(true);
-
-      fetch(`http://127.0.0.1:8000/api/orcid/list?page=${pageNumber}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('No se pudo cargar la lista de investigadores');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          if (data && Array.isArray(data.data)) {
-            setInvestigadores(data.data);
-            setTotalPages(data.meta.last_page);
-          } else {
-            throw new Error('La respuesta no contiene una matriz de investigadores válida');
-          }
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error al listar investigadores:', error);
-          setLoading(false);
-          setError(error);
-        });
-    };
-
-    cargarPagina(currentPage);
+    // Función para cargar datos de la página actual
+    cargarPagina(currentPage)
+      .then((data) => {
+        if (data && Array.isArray(data.data)) {
+          setInvestigadores(data.data);
+          setTotalPages(data.meta.last_page);
+        } else {
+          throw new Error('La respuesta no contiene una matriz de investigadores válida');
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error al listar investigadores:', error);
+        setLoading(false);
+        setError(error);
+      });
   }, [currentPage]);
 
-  const eliminarInvestigador = (orcid) => {
-    fetch(`http://127.0.0.1:8000/api/orcid/delete/${orcid}`, {
-      method: 'DELETE',
-    })
-      .then((response) => response.json())
+  const handleEliminarInvestigador = (orcid) => {
+    eliminarInvestigador(orcid)
       .then((data) => {
         if (data.message === 'Investigador eliminado correctamente') {
           alert(data.message);
@@ -94,7 +82,7 @@ function InvestigadoresList() {
                     </ul>
                   </td>
                   <td>
-                    <button onClick={() => eliminarInvestigador(investigador.orcid)}>Eliminar</button>
+                    <button onClick={() => handleEliminarInvestigador(investigador.orcid)}>Eliminar</button>
                   </td>
                 </tr>
               ))}

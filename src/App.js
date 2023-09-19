@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import InvestigadoresList from './InvestigadoresList';
+import InvestigadoresList from './components/InvestigadoresList';
 
 function App() {
   return (
